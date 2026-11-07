@@ -52,3 +52,19 @@ SOCKS5_PROXY_PASSWORD=password
 ```
 
 Не забудьте перезапустить дискорд. Готово!
+
+## Сборка этого форка
+
+Исходники исправленного `force-proxy` и Microsoft Detours включены в
+`third_party/`. Нужны Visual Studio 2022 с компонентами разработки C++ и Windows
+SDK, а также .NET 8 SDK. Выполните в PowerShell:
+
+```powershell
+./build.ps1
+# Сборка с проверками; дополнительно нужен Python 3 x64:
+./build.ps1 -Test
+```
+
+Обе DLL появятся в `x64/Release/`, установщик и необходимые ему файлы — в
+`installer/bin/Release/net8.0-windows/`. Соседние репозитории и отдельная установка
+vcpkg не нужны. Описание исправлений и ограничений: [SECURITY-FIXES.md](SECURITY-FIXES.md).

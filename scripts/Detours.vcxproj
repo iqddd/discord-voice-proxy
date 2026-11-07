@@ -1,0 +1,37 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{27BFC56E-3997-4FBB-8CFC-8295DC55E529}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <TargetName>detours</TargetName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;_WIN32_WINNT=0x0600;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\third_party\detours\src\detours.cpp" />
+    <ClCompile Include="..\third_party\detours\src\modules.cpp" />
+    <ClCompile Include="..\third_party\detours\src\disasm.cpp" />
+    <ClCompile Include="..\third_party\detours\src\image.cpp" />
+    <ClCompile Include="..\third_party\detours\src\creatwth.cpp" />
+    <ClCompile Include="..\third_party\detours\src\disolx86.cpp" />
+    <ClCompile Include="..\third_party\detours\src\disolx64.cpp" />
+    <ClCompile Include="..\third_party\detours\src\disolia64.cpp" />
+    <ClCompile Include="..\third_party\detours\src\disolarm.cpp" />
+    <ClCompile Include="..\third_party\detours\src\disolarm64.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

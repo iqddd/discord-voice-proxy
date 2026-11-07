@@ -57,6 +57,23 @@ Don’t forget to restart Discord. Done!
 
 # Troubleshooting
 
+## Building this fork
+
+This fork includes the patched `force-proxy` and Microsoft Detours sources in
+`third_party/`. On Windows, install Visual Studio 2022 with the C++ desktop tools
+and Windows SDK, plus the .NET 8 SDK. From PowerShell run:
+
+```powershell
+./build.ps1
+# Also run regression tests (requires x64 Python 3):
+./build.ps1 -Test
+```
+
+Both DLLs are written to `x64/Release/`; the installer and its runtime files are
+in `installer/bin/Release/net8.0-windows/`. No adjacent repository or vcpkg
+installation is required. See [SECURITY-FIXES.md](SECURITY-FIXES.md) for the
+security changes, test coverage and limitations.
+
 ## Troubleshooting DNS Issues
 
 If Discord works when using a TUN/VPN mode but gets stuck on "Checking for updates..." or repeatedly shows "Connection failed, retrying..." when using `discord-voice-proxy` with *known-working* SOCKS5 proxy without TUN, checking for local DNS poisoning is especially important.

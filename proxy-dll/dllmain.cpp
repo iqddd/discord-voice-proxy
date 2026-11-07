@@ -4,8 +4,11 @@
 #include <sstream>
 #include <iostream>
 #include <filesystem>
+#include <vector>
 #include <detours/detours.h>
 #include "proxy.h"
+#include "proxy_config.h"
+#pragma comment(lib, "detours.lib")
 
 namespace fs = std::filesystem;
 
@@ -83,45 +86,38 @@ BOOL __stdcall Mine_CreateProcessW(LPCWSTR lpApplicationName,
 		lpProcessInformation);
 }
 
-void LoadForceProxy()
+bool LoadForceProxy(HMODULE module)
 {
-	std::ifstream file("proxy.txt");
-	std::string line;
-
-	while (file.is_open() && getline(file, line)) {
-		std::stringstream ss(line);
-
-		std::string key, value;
-		if (getline(ss, key, '=') && getline(ss, value)) {
-			SetEnvironmentVariableA(key.c_str(), value.c_str());
-		}
-	}
-
-	if (LoadLibraryA("force-proxy.dll") == NULL) {
-		char text[MAX_PATH];
-		_snprintf_s(text, sizeof(text), "Cannot load force-proxy.dll. Error code: %d", GetLastError());
-		MessageBoxA(0, text, "Proxy", MB_ICONERROR);
-	}
+	std::vector<wchar_t> path(32768);
+	const DWORD size = GetModuleFileNameW(module, path.data(), static_cast<DWORD>(path.size()));
+	if (!size || size >= path.size()) return false;
+	const auto directory = fs::path(path.data()).parent_path();
+	if (!ApplyProxyConfig(directory)) return false;
+	return LoadLibraryExW((directory / L"force-proxy.dll").c_str(), nullptr,
+		LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32) != nullptr;
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-	char path[MAX_PATH];
+	wchar_t path[MAX_PATH];
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
 	{
 		DisableThreadLibraryCalls(hModule);
-		CopyMemory(path + GetSystemDirectoryA(path, MAX_PATH - 12), "\\DWrite.dll", 13);
-		OriginalDLL = LoadLibraryA(path);
+		const UINT length = GetSystemDirectoryW(path, MAX_PATH);
+		if (!length || length >= MAX_PATH) return FALSE;
+		OriginalDLL = LoadLibraryW((fs::path(path) / L"DWrite.dll").c_str());
 		if (OriginalDLL == NULL)
 		{
-			MessageBoxA(0, "Cannot load original version.dll", "Proxy", MB_ICONERROR);
-			MessageBoxA(0, path, "Proxy", MB_ICONERROR);
-			ExitProcess(0);
+			return FALSE;
 		}
 		OrignalDWriteCreateFactory = (uintptr_t)GetProcAddress(OriginalDLL, "DWriteCreateFactory");
 
-		LoadForceProxy();
+		if (!OrignalDWriteCreateFactory || !LoadForceProxy(hModule)) {
+			FreeLibrary(OriginalDLL);
+			OriginalDLL = nullptr;
+			return FALSE;
+		}
 		DetourRestoreAfterWith();
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
